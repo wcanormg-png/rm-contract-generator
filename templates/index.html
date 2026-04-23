@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSA Contract Generator — Residents Medical</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#003366;--navy2:#002244;--navy3:#001a33;
+  --gold:#C9A84C;--gold2:#b8963e;--goldbg:#fdf8ee;--goldbdr:#e8d4a0;
+  --bg:#fff;--bg2:#f8f9fb;--bg3:#f0f2f5;
+  --text:#1a1a2e;--text2:#4a5568;--text3:#9aa5b4;
+  --border:rgba(0,51,102,.12);--border2:rgba(0,51,102,.25);
+  --green:#1a7a3c;--greenbg:#edfaf2;--greenbdr:#a0d8b8;
+  --red:#c0392b;--redbg:#fdf0ef;--redbdr:#f5c0bc;
+  --r:10px;--rs:6px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;}
+
+/* Top bar */
+.topbar{background:var(--navy);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-mark{width:36px;height:36px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:var(--navy);letter-spacing:-1px;flex-shrink:0;}
+.logo-text{font-size:14px;font-weight:600;color:#fff;line-height:1.2;}
+.logo-sub{font-size:11px;color:rgba(255,255,255,.6);font-weight:400;}
+.role-badge{font-size:12px;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.2);display:none;}
+.role-badge.show{display:inline-flex;align-items:center;gap:5px;}
+.role-badge.mgr{background:var(--gold);color:var(--navy);border-color:var(--gold2);font-weight:600;}
+
+/* Page */
+.page{max-width:700px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);border-radius:var(--r);padding:2.5rem 2rem;margin-bottom:2rem;margin-top:2rem;position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:var(--gold);opacity:.06;border-radius:50%;}
+.hero::after{content:"";position:absolute;bottom:-60px;right:40px;width:120px;height:120px;background:var(--gold);opacity:.04;border-radius:50%;}
+.hero h1{font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;}
+.hero p{font-size:14px;color:rgba(255,255,255,.7);line-height:1.6;}
+.hero-tag{display:inline-block;background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:12px;letter-spacing:.05em;text-transform:uppercase;}
+
+/* Gate */
+.gate{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:2.5rem 2rem;text-align:center;}
+.gate h2{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.gate p{font-size:14px;color:var(--text2);margin-bottom:2rem;line-height:1.6;}
+.gate-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.gate-btn{padding:12px 28px;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.gate-btn.rep{border:2px solid var(--border2);background:var(--bg);color:var(--navy);}
+.gate-btn.rep:hover{background:var(--bg2);border-color:var(--navy);}
+.gate-btn.mgr{border:2px solid var(--navy);background:var(--navy);color:#fff;}
+.gate-btn.mgr:hover{background:var(--navy2);}
+
+/* Steps */
+.stepbar{display:flex;align-items:center;margin-bottom:1.75rem;}
+.sdot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);color:var(--text3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.sdot.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.sdot.done{background:var(--green);border-color:var(--green);color:#fff;}
+.slbl{font-size:12px;color:var(--text3);margin-left:7px;white-space:nowrap;}
+.slbl.active{color:var(--navy);font-weight:600;}
+.sline{flex:1;height:2px;background:var(--border);margin:0 8px;border-radius:1px;}
+.sline.done{background:var(--green);}
+
+/* Panels */
+.panel{display:none;}.panel.active{display:block;}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;box-shadow:0 1px 4px rgba(0,51,102,.06);}
+
+/* Form */
+.stitle{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin:1.5rem 0 .875rem;padding-bottom:6px;border-bottom:2px solid var(--goldbdr);}
+.stitle:first-child{margin-top:0;}
+.frow{margin-bottom:1rem;}
+.flbl{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.req{font-size:10px;color:#fff;background:var(--red);border-radius:3px;padding:1px 6px;font-weight:600;}
+.opt{font-size:10px;color:var(--text3);background:var(--bg3);border-radius:3px;padding:1px 6px;border:1px solid var(--border);}
+.fdesc{font-size:12px;color:var(--text2);margin-bottom:5px;line-height:1.5;}
+.fi{width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:var(--rs);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;transition:all .15s;}
+.fi:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,51,102,.1);}
+.fi.opt-field{border-style:dashed;border-color:rgba(0,51,102,.2);}
+.fi.filled{border-style:solid!important;border-color:var(--navy)!important;font-weight:600;background:var(--bg);}
+textarea.fi{resize:vertical;min-height:88px;line-height:1.6;}
+
+/* Services */
+.svc-bar{display:flex;gap:8px;margin-bottom:1rem;align-items:center;}
+.svc-count{font-size:12px;color:var(--text2);margin-left:auto;font-weight:500;}
+.bsm{padding:6px 14px;font-size:12px;border:1.5px solid var(--border2);border-radius:var(--rs);background:var(--bg);cursor:pointer;font-family:inherit;font-weight:500;color:var(--navy);}
+.bsm:hover{background:var(--bg2);}
+.svc-list{display:flex;flex-direction:column;gap:5px;max-height:420px;overflow-y:auto;padding-right:2px;}
+.svc-row{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--rs);cursor:pointer;background:var(--bg);transition:all .1s;}
+.svc-row:hover{border-color:var(--navy);background:rgba(0,51,102,.03);}
+.svc-row.on{border-color:var(--navy);background:rgba(0,51,102,.05);}
+.chk{width:18px;height:18px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;background:var(--bg);}
+.svc-row.on .chk{background:var(--navy);border-color:var(--navy);}
+.svc-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.4;}
+.svc-desc{font-size:11px;color:var(--text2);margin-top:2px;}
+
+/* Buttons */
+.acts{display:flex;gap:10px;margin-top:1.75rem;justify-content:flex-end;}
+.btn{padding:10px 22px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;border:2px solid transparent;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-outline{border-color:var(--border2);background:var(--bg);color:var(--navy);}
+.btn-outline:hover:not(:disabled){background:var(--bg2);}
+.btn-navy{background:var(--navy);color:#fff;border-color:var(--navy);}
+.btn-navy:hover:not(:disabled){background:var(--navy2);}
+.btn-gold{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+.btn-gold:hover:not(:disabled){background:var(--gold2);}
+
+/* Alerts */
+.alert{border-radius:var(--rs);padding:12px 15px;font-size:13px;margin-top:1rem;line-height:1.5;}
+.alert-info{background:rgba(0,51,102,.05);border:1.5px solid rgba(0,51,102,.2);color:var(--navy);}
+.alert-warn{background:var(--goldbg);border:1.5px solid var(--goldbdr);color:#7a5800;margin-bottom:1rem;}
+.alert-err{background:var(--redbg);border:1.5px solid var(--redbdr);color:var(--red);margin-top:.75rem;}
+.alert-ok{background:var(--greenbg);border:1.5px solid var(--greenbdr);color:var(--green);margin-top:1rem;}
+
+/* Summary */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:13px 15px;}
+.slbl2{font-size:11px;color:var(--text3);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.sval{font-size:14px;font-weight:700;color:var(--navy);}
+.svc-prev{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;max-height:140px;overflow-y:auto;font-size:12px;line-height:2;}
+
+/* DL row */
+.dlrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.5rem;}
+
+/* Submitted */
+.submitted{text-align:center;padding:3rem 1rem;}
+.sub-icon{font-size:48px;margin-bottom:16px;}
+.sub-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.sub-sub{font-size:14px;color:var(--text2);line-height:1.7;max-width:380px;margin:0 auto;}
+
+/* Spinner */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Gold divider accent */
+.gold-accent{height:3px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px;margin-bottom:1.5rem;}
+
+@media(max-width:480px){.page{padding:1rem 1rem 3rem;}.sgrid{grid-template-columns:1fr;}.acts,.gate-btns{flex-direction:column;}.btn,.gate-btn{width:100%;text-align:center;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">RM</div>
+    <div>
+      <div class="logo-text">Residents Medical Group</div>
+      <div class="logo-sub">PSA Contract Generator</div>
+    </div>
+  </div>
+  <div class="role-badge" id="roleBadge"></div>
+</div>
+
+<div class="page">
+
+<!-- GATE -->
+<div id="gateWrap">
+  <div class="hero">
+    <div class="hero-tag">Internal Tool</div>
+    <h1>PSA Contract Generator</h1>
+    <p>Generate personalized Professional Services Agreements in seconds. Sales reps submit candidate details — managers review and download.</p>
+  </div>
+  <div class="gate">
+    <h2>Who are you?</h2>
+    <p>Select your role to get started.</p>
+    <div class="gate-btns">
+      <button class="gate-btn rep" id="repBtn">I'm a Sales Rep</button>
+      <button class="gate-btn mgr" id="mgrBtn">I'm a Manager</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;margin-top:2rem;">
+  <div class="stepbar" id="stepBar"></div>
+
+  <!-- Step 1: Services -->
+  <div class="panel active" id="p0">
+  <div class="card">
+    <div class="gold-accent"></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1rem;">Check the services to include in <strong style="color:var(--navy)">Section 2</strong> of the contract. Unchecked items are removed entirely.</div>
+    <div class="svc-bar">
+      <button class="bsm" id="selAll">Select all</button>
+      <button class="bsm" id="clrAll">Clear all</button>
+      <span class="svc-count"><span id="svcCnt">28</span> of 28 selected</span>
+    </div>
+    <div class="svc-list" id="svcList"></div>
+    <div class="acts"><button class="btn btn-navy" id="toStep1">Next: Candidate Details →</button></div>
+  </div>
+  </div>
+
+  <!-- Step 2: Details -->
+  <div class="panel" id="p1">
+  <div class="card">
+    <div class="gold-accent"></div>
+    <div id="mgrBadgeRow" style="display:none;margin-bottom:1rem;"><span style="font-size:12px;padding:4px 12px;border-radius:20px;background:var(--navy);color:#fff;font-weight:600;">Manager Mode</span></div>
+    <div class="alert alert-warn" style="margin-bottom:1.25rem;">Payment fields are <strong>optional</strong> — leave any blank and that line is automatically removed from the contract.</div>
+
+    <div class="stitle">Candidate Information</div>
+    <div class="frow"><div class="flbl">Full name <span class="req">required</span></div><input class="fi" id="f_CANDIDATE_FULL_NAME" placeholder="e.g. Maria Garcia"></div>
+    <div class="frow"><div class="flbl">Degree <span class="req">required</span></div><input class="fi" id="f_CANDIDATE_DEGREE" placeholder="e.g. MD, MBBS, DO"></div>
+    <div class="frow"><div class="flbl">Email address <span class="req">required</span></div><input class="fi" type="email" id="f_CANDIDATE_EMAIL" placeholder="e.g. maria@gmail.com"></div>
+    <div class="frow"><div class="flbl">Phone number <span class="req">required</span></div><input class="fi" id="f_CANDIDATE_PHONE" placeholder="e.g. 555-123-4567"></div>
+
+    <div class="stitle">Payment Schedule</div>
+    <div class="frow"><div class="flbl">Total contract fee <span class="opt">optional</span></div><input class="fi opt-field" id="f_TOTAL_FEE" placeholder="e.g. 200,000"></div>
+    <div class="frow"><div class="flbl">Initial payment — due at signing <span class="opt">optional</span></div><input class="fi opt-field" id="f_INITIAL_PAYMENT" placeholder="e.g. 75,000"></div>
+    <div class="frow"><div class="flbl">Second payment amount <span class="opt">optional</span></div><input class="fi opt-field" id="f_SECOND_PAYMENT" placeholder="e.g. 25,000"></div>
+    <div class="frow"><div class="flbl">Second payment due date <span class="opt">optional</span></div><input class="fi opt-field" id="f_SECOND_PAYMENT_DATE" placeholder="e.g. May 1, 2026"></div>
+    <div class="frow"><div class="flbl">Trust / escrow amount <span class="opt">optional</span></div><input class="fi opt-field" id="f_TRUST_PAYMENT" placeholder="e.g. 100,000"></div>
+    <div class="frow"><div class="flbl">Trust payment deadline <span class="opt">optional</span></div><input class="fi opt-field" id="f_TRUST_PAYMENT_DATE" placeholder="e.g. December 1, 2026"></div>
+    <div class="frow"><div class="flbl">Final payment — upon residency acceptance <span class="opt">optional</span></div><input class="fi opt-field" id="f_FINAL_PAYMENT" placeholder="e.g. 100,000"></div>
+    <div class="frow"><div class="flbl">PGY-2 additional fee <span class="opt">optional</span></div><input class="fi opt-field" id="f_PGY2_FEE" placeholder="e.g. 100,000 — leave blank if N/A"></div>
+
+    <div class="stitle">Agreement Terms</div>
+    <div class="frow"><div class="flbl">Agreement term <span class="req">required</span></div><input class="fi" id="f_AGREEMENT_TERM" value="two (2) years"></div>
+
+    <div class="stitle" style="letter-spacing:0;font-size:12px;text-transform:none;">Additional Clause — Section 5 <span style="font-weight:400;color:var(--text3)">(optional bullet point after payment terms)</span></div>
+    <div class="frow">
+      <div class="fdesc">Leave blank to omit. Will appear as a formatted bullet after the payment schedule.</div>
+      <textarea class="fi opt-field" id="f_ADDITIONAL_NOTES" placeholder="e.g. If the candidate fails Step 3, the contract will be extended for one (1) additional year at no additional cost."></textarea>
+    </div>
+
+    <div id="mgrEmailRow" style="display:none;">
+      <div class="stitle">Email Delivery</div>
+      <div class="frow">
+        <div class="flbl">Send contract to <span class="opt">optional</span></div>
+        <div class="fdesc">The .docx contract will be emailed to this address after generation.</div>
+        <input class="fi" type="email" id="f_MANAGER_EMAIL" value="wcanormg@gmail.com">
+      </div>
+    </div>
+
+    <div id="detailErr"></div>
+    <div class="acts">
+      <button class="btn btn-outline" id="toStep0">← Back</button>
+      <button class="btn btn-navy" id="toStep2">Review Summary →</button>
+    </div>
+  </div>
+  </div>
+
+  <!-- Step 3: Review -->
+  <div class="panel" id="p2">
+  <div class="card">
+    <div class="gold-accent"></div>
+    <div class="sgrid" id="sumGrid"></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Services Included (<span id="svcSumCnt"></span> of 28)</div>
+    <div class="svc-prev" id="svcPreview"></div>
+
+    <div id="repBlock">
+      <div class="alert alert-info" style="margin-top:1rem;">Your submission will be sent to the Residents Medical manager for review. <strong>You will not receive the contract file directly.</strong></div>
+      <div class="acts">
+        <button class="btn btn-outline" id="toStep1b">← Back</button>
+        <button class="btn btn-navy" id="submitRepBtn">Submit for Review →</button>
+      </div>
+    </div>
+
+    <div id="mgrBlock" style="display:none;">
+      <div class="alert alert-info" style="margin-top:1rem;">Everything looks good. Click <strong>Generate Contract</strong> to build the .docx file.</div>
+      <div id="genErr"></div>
+      <div class="acts">
+        <button class="btn btn-outline" id="toStep1c">← Back</button>
+        <button class="btn btn-gold" id="generateBtn">Generate Contract →</button>
+      </div>
+      <div id="dlRow" class="dlrow" style="display:none;"></div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Submitted -->
+  <div class="panel" id="p3">
+  <div class="card submitted">
+    <div class="sub-icon">✅</div>
+    <div class="sub-title">Submitted Successfully</div>
+    <div class="sub-sub">Your candidate details have been sent to the Residents Medical team. The manager will generate and review the contract before it is finalized with the candidate.</div>
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+      <p style="font-size:12px;color:var(--text3);">Residents Medical Group · Building Tomorrow's Doctors, Today.™</p>
+    </div>
+  </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const SVCS=[
+  {id:"SVC_01",n:"Professional CV Editing & Revamping",d:"By current/former Program Director, Chairperson, DIO, or Dean"},
+  {id:"SVC_02",n:"Professional Personal Statement Editing",d:"Specialty-specific, by GME leadership"},
+  {id:"SVC_03",n:"ERAS Application Editing & Revamping",d:"Complete electronic application editing"},
+  {id:"SVC_04",n:"ABSITE Tutoring",d:""},
+  {id:"SVC_05",n:"USMLE Step 1/2/3 Instruction (10 hrs)",d:"Private 1-on-1; exam within 90 days of execution"},
+  {id:"SVC_06",n:"ITE Tutoring – Individualized One-on-One",d:"Two sessions + full 6-month curriculum"},
+  {id:"SVC_07",n:"Edyou Platform Access",d:"24/7 AI-powered USMLE/ITE prep platform"},
+  {id:"SVC_08",n:"Rotation(s) Placement",d:"At a university-based teaching hospital"},
+  {id:"SVC_09",n:"Insured Hands-On Clinical Externship",d:""},
+  {id:"SVC_10",n:"Clinical Externship / Research Fellowship",d:"Teaching hospital under a PD's mentorship, or hybrid"},
+  {id:"SVC_11",n:"9–12 Month Research Fellowship",d:"Teaching hospital under a PD's mentorship"},
+  {id:"SVC_12",n:"CITI Certification Program Enrollment",d:"RM combined research preparation certification"},
+  {id:"SVC_13",n:"Interview Preparation & Evaluation",d:"By current/former PD, chairperson, DIO, dean, or RM staff"},
+  {id:"SVC_14",n:"Follow-Up Post-Interview Guidance",d:""},
+  {id:"SVC_15",n:"RM Network Access – Immediate Eligibility",d:"All programs throughout the term"},
+  {id:"SVC_16",n:"Accent Reduction",d:"By a licensed speech pathologist"},
+  {id:"SVC_17",n:"Test Anxiety Training / Counseling",d:""},
+  {id:"SVC_18",n:"Advisory & GME Consulting Services",d:"By seasoned GME professionals"},
+  {id:"SVC_19",n:"Guidance Prep – 6 RM Core Competencies",d:""},
+  {id:"SVC_20",n:"Guidance Prep – 6 ACGME Core Competencies",d:""},
+  {id:"SVC_21",n:"Private Counseling, Career Guidance & Networking",d:"Sessions with Chairperson(s), PD(s), DIO(s)"},
+  {id:"SVC_22",n:"RM Networking Events & Exclusive Webinars",d:""},
+  {id:"SVC_23",n:"Webinar-Based Teaching Courses",d:"By Medical Professors and GME Leaders"},
+  {id:"SVC_24",n:"Clinical Document Specialist (if needed)",d:"RM/AHIMA Collaboration Course with Certification"},
+  {id:"SVC_25",n:"Communication Enhancement",d:"By renowned linguistic expert(s)"},
+  {id:"SVC_26",n:"Life Coach – Personal Development",d:""},
+  {id:"SVC_27",n:"ECFMG Certificate Assistance",d:""},
+  {id:"SVC_28",n:"Courses in Spanish for Medical/Healthcare Professionals",d:""},
+];
+const REQ=["f_CANDIDATE_FULL_NAME","f_CANDIDATE_DEGREE","f_CANDIDATE_EMAIL","f_CANDIDATE_PHONE","f_AGREEMENT_TERM"];
+const KEYS=["CANDIDATE_FULL_NAME","CANDIDATE_DEGREE","CANDIDATE_EMAIL","CANDIDATE_PHONE",
+  "TOTAL_FEE","INITIAL_PAYMENT","SECOND_PAYMENT","SECOND_PAYMENT_DATE",
+  "TRUST_PAYMENT","TRUST_PAYMENT_DATE","FINAL_PAYMENT","PGY2_FEE",
+  "AGREEMENT_TERM","ADDITIONAL_NOTES","MANAGER_EMAIL"];
+
+let sel=new Set(SVCS.map(s=>s.id));
+let isMgr=false, mgrPin='';
+
+document.getElementById("repBtn").onclick=()=>startAs(false);
+document.getElementById("mgrBtn").onclick=()=>{
+  const pin=prompt("Enter manager PIN:");
+  if(!pin) return;
+  fetch("/verify-pin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({pin})})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok){mgrPin=pin;startAs(true);}
+      else alert("Incorrect PIN. Contact your manager.");
+    });
+};
+
+function startAs(mgr){
+  isMgr=mgr;
+  document.getElementById("gateWrap").style.display="none";
+  document.getElementById("mainApp").style.display="block";
+  const b=document.getElementById("roleBadge");
+  b.className="role-badge show"+(mgr?" mgr":"");
+  b.textContent=mgr?"⚙ Manager":"Sales Rep";
+  if(mgr){
+    document.getElementById("mgrBadgeRow").style.display="block";
+    document.getElementById("mgrEmailRow").style.display="block";
+    document.getElementById("repBlock").style.display="none";
+    document.getElementById("mgrBlock").style.display="block";
+  }
+  renderSteps(0);
+}
+
+const listEl=document.getElementById("svcList");
+SVCS.forEach(s=>{
+  const row=document.createElement("div");
+  row.className="svc-row on"; row.dataset.id=s.id;
+  row.innerHTML=`<div class="chk">✓</div><div><div class="svc-name">${s.n}</div>${s.d?`<div class="svc-desc">${s.d}</div>`:""}</div>`;
+  row.onclick=()=>{
+    if(sel.has(s.id)){sel.delete(s.id);row.classList.remove("on");row.querySelector(".chk").textContent="";}
+    else{sel.add(s.id);row.classList.add("on");row.querySelector(".chk").textContent="✓";}
+    document.getElementById("svcCnt").textContent=sel.size;
+    document.getElementById("toStep1").disabled=sel.size===0;
+  };
+  listEl.appendChild(row);
+});
+document.getElementById("selAll").onclick=()=>{
+  SVCS.forEach(s=>sel.add(s.id));
+  listEl.querySelectorAll(".svc-row").forEach(r=>{r.classList.add("on");r.querySelector(".chk").textContent="✓";});
+  document.getElementById("svcCnt").textContent=sel.size;
+};
+document.getElementById("clrAll").onclick=()=>{
+  sel.clear();
+  listEl.querySelectorAll(".svc-row").forEach(r=>{r.classList.remove("on");r.querySelector(".chk").textContent="";});
+  document.getElementById("svcCnt").textContent=0;
+  document.getElementById("toStep1").disabled=true;
+};
+document.querySelectorAll(".fi").forEach(el=>{
+  el.addEventListener("input",()=>el.classList.toggle("filled",el.value.trim().length>0));
+  if(el.value.trim()) el.classList.add("filled");
+});
+
+function renderSteps(n){
+  const steps=["Services","Details","Review"];
+  document.getElementById("stepBar").innerHTML=steps.map((l,i)=>`
+    <div style="display:flex;align-items:center;gap:7px;">
+      <div class="sdot ${i<n?"done":i===n?"active":""}">${i<n?"✓":i+1}</div>
+      <span class="slbl ${i===n?"active":""}">${l}</span>
+    </div>${i<steps.length-1?`<div class="sline${i<n?" done":""}"></div>`:""}`).join("");
+}
+function goTo(n){
+  [0,1,2,3].forEach(i=>document.getElementById("p"+i).className="panel"+(i===n?" active":""));
+  if(n<=2) renderSteps(n);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.getElementById("toStep1").onclick=()=>goTo(1);
+document.getElementById("toStep0").onclick=()=>goTo(0);
+document.getElementById("toStep1b").onclick=()=>goTo(1);
+document.getElementById("toStep1c").onclick=()=>goTo(1);
+
+document.getElementById("toStep2").onclick=()=>{
+  const missing=REQ.filter(k=>!document.getElementById(k)?.value?.trim());
+  if(missing.length){
+    document.getElementById("detailErr").innerHTML=`<div class="alert alert-err">Please fill in all required fields before continuing.</div>`;
+    return;
+  }
+  document.getElementById("detailErr").innerHTML="";
+  const v=k=>document.getElementById("f_"+k)?.value?.trim()||"";
+  const pays=[
+    v("TOTAL_FEE")?`Total: $${v("TOTAL_FEE")}`:null,
+    v("INITIAL_PAYMENT")?`Initial: $${v("INITIAL_PAYMENT")}`:null,
+    v("SECOND_PAYMENT")?`2nd: $${v("SECOND_PAYMENT")}${v("SECOND_PAYMENT_DATE")?" by "+v("SECOND_PAYMENT_DATE"):""}`:null,
+    v("TRUST_PAYMENT")?`Trust: $${v("TRUST_PAYMENT")}${v("TRUST_PAYMENT_DATE")?" by "+v("TRUST_PAYMENT_DATE"):""}`:null,
+    v("FINAL_PAYMENT")?`Final: $${v("FINAL_PAYMENT")}`:null,
+    v("PGY2_FEE")?`PGY-2: $${v("PGY2_FEE")}`:null,
+  ].filter(Boolean).join("  ·  ")||"No payment lines specified";
+  document.getElementById("sumGrid").innerHTML=`
+    <div class="scard"><div class="slbl2">Candidate</div><div class="sval">${v("CANDIDATE_FULL_NAME")}, ${v("CANDIDATE_DEGREE")}</div></div>
+    <div class="scard"><div class="slbl2">Services</div><div class="sval">${sel.size} of 28 included</div></div>
+    <div class="scard" style="grid-column:1/-1"><div class="slbl2">Payment Schedule</div><div class="sval" style="font-size:12px;font-weight:500;">${pays}</div></div>
+    ${v("ADDITIONAL_NOTES")?`<div class="scard" style="grid-column:1/-1"><div class="slbl2">Additional Clause</div><div class="sval" style="font-size:12px;font-weight:400;">${v("ADDITIONAL_NOTES").substring(0,160)}${v("ADDITIONAL_NOTES").length>160?"…":""}</div></div>`:""}
+  `;
+  document.getElementById("svcSumCnt").textContent=sel.size;
+  document.getElementById("svcPreview").innerHTML=SVCS.filter(s=>sel.has(s.id)).map(s=>`• ${s.n}`).join("<br>");
+  document.getElementById("dlRow").style.display="none";
+  document.getElementById("genErr").innerHTML="";
+  goTo(2);
+};
+
+function collectFields(){
+  const f={};
+  KEYS.forEach(k=>{const el=document.getElementById("f_"+k);if(el&&el.value.trim())f[k]=el.value.trim();});
+  return f;
+}
+
+document.getElementById("submitRepBtn").onclick=async()=>{
+  const btn=document.getElementById("submitRepBtn");
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Submitting…';
+  try{
+    const r=await fetch("/submit-rep",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:collectFields(),services:[...sel]})});
+    const d=await r.json();
+    if(d.status==="ok") goTo(3);
+    else throw new Error(d.message||"Submission failed");
+  }catch(e){
+    document.getElementById("repBlock").insertAdjacentHTML("beforeend",`<div class="alert alert-err">${e.message}</div>`);
+    btn.disabled=false; btn.textContent="Submit for Review →";
+  }
+};
+
+document.getElementById("generateBtn").onclick=async()=>{
+  const btn=document.getElementById("generateBtn");
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Generating…';
+  document.getElementById("genErr").innerHTML="";
+  document.getElementById("dlRow").style.display="none";
+  try{
+    const r=await fetch("/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:collectFields(),services:[...sel],pin:mgrPin})});
+    const d=await r.json();
+    if(d.status!=="ok") throw new Error(d.message||"Generation failed");
+    const dlRow=document.getElementById("dlRow");
+    dlRow.style.display="flex";
+    dlRow.innerHTML=`<a href="${d.docx_url}" class="btn btn-gold" download>⬇ Download PSA — ${d.candidate}.docx</a>`;
+    if(d.email_sent){
+      dlRow.insertAdjacentHTML("beforeend",`<div class="alert alert-ok" style="width:100%">✓ Contract emailed to ${document.getElementById("f_MANAGER_EMAIL")?.value||""}</div>`);
+    } else if(d.email_msg&&d.email_msg!=="no address provided"){
+      dlRow.insertAdjacentHTML("beforeend",`<div class="alert alert-warn" style="width:100%">Note: Email not sent — ${d.email_msg}</div>`);
+    }
+  }catch(e){
+    document.getElementById("genErr").innerHTML=`<div class="alert alert-err">${e.message}</div>`;
+  }finally{
+    btn.disabled=false; btn.textContent="Generate Contract →";
+  }
+};
+</script>
+</body>
+</html>
